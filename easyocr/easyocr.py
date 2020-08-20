@@ -2,7 +2,7 @@
 
 from .detection import get_detector, get_textbox
 from .imgproc import loadImage
-from .recognition import get_recognizer, get_text
+from .recognition import get_recognizer, get_text, split_result
 from .utils import group_text_box, get_image_list, calculate_md5, get_paragraph, download_and_unzip
 from bidi.algorithm import get_display
 import numpy as np
@@ -276,6 +276,7 @@ class Reader(object):
         self.recognizer, self.converter = get_recognizer(input_channel, output_channel,\
                                                          hidden_size, self.character, separator_list,\
                                                          dict_list, model_path, device = self.device)
+        self.bboxes, self.texts, self.scores = None, None, None
 
     def readtext(self, image, decoder = 'greedy', beamWidth= 5, batch_size = 1,\
                  workers = 0, allowlist = None, blocklist = None, detail = 1,\
@@ -332,6 +333,8 @@ class Reader(object):
         result = get_text(self.character, imgH, int(max_width), self.recognizer, self.converter, image_list,\
                       ignore_char, decoder, beamWidth, batch_size, contrast_ths, adjust_contrast, filter_ths,\
                       workers, self.device)
+
+        self.bboxes, self.texts, self.scores = split_result(result)
 
         if self.model_lang == 'arabic':
             direction_mode = 'rtl'

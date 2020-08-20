@@ -3,37 +3,33 @@ import os
 import sys
 import easyocr
 import PIL
+import cv2
+import numpy as np
 from PIL import ImageDraw
+from easyocr import general_utils as g_utils
+from easyocr import craft_file_utils as f_utils
 
 
 _this_folder_ = os.path.dirname(os.path.abspath(__file__))
 _this_basename_ = os.path.splitext(os.path.basename(__file__))[0]
 
-# Draw bounding boxes
-def draw_boxes(image, bounds, color='yellow', width=2):
-    draw = ImageDraw.Draw(image)
-    for bound in bounds:
-        p0, p1, p2, p3 = bound[0]
-        draw.line([*p0, *p1, *p2, *p3, *p0], fill=color, width=width)
-    return image
 
 def main(args):
 
     # Create a reader to do OCR.
     reader = easyocr.Reader(lang_list=args.lang, gpu=args.gpu)
 
-    img = PIL.Image.open(args.file)
+    # Read image
+    img = g_utils.imread(args.file)
 
     # Doing OCR. Get bounding boxes.
-    bounds = reader.readtext(args.file, detail=args.detail)
+    results = reader.readtext(args.file, detail=args.detail)
 
     print("[Text recog.] results :")
-    for line in bounds:
+    for line in results:
         print(line)
 
-    res_img = draw_boxes(img, bounds)
-    res_img.show()
-
+    f_utils.saveResult('result.png', img, reader.bboxes, dirname='./Output/', texts=reader.texts)
     pass
 
 def parse_arguments(argv):
