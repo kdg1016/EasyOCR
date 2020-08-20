@@ -214,3 +214,11 @@ def get_text(character, imgH, imgW, recognizer, converter, image_list,\
     #    print('not sure', pred, confidence_score.item())
 
     return result
+
+def split_result(result):
+    bboxes, texts, scores = [], [], []
+    for zipped in result:
+        bboxes.append(zipped[0])
+        texts.append(zipped[1])
+        scores.append(zipped[2])
+    return bboxes, texts, scores
